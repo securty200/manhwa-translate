@@ -25,23 +25,18 @@ export function truncate(str: string, length: number): string {
   return str.slice(0, length) + "...";
 }
 
-export const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
-
 /** Convert a filesystem image path to an accessible HTTP URL.
- *  Backend mounts CACHE_DIR at /static, so paths are relative to cache/. */
+ *  Backend mounts CACHE_DIR at /static. The /static path is proxied
+ *  by Next.js to the backend, so we use a relative URL that works
+ *  in both dev and deployed environments. */
 export function imageUrl(path?: string): string {
   if (!path) return "";
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
   const idx = path.indexOf("cache/");
   if (idx >= 0) {
-    // e.g. /app/cache/uploads/manga1/page.png → /static/uploads/manga1/page.png
-    // Skip past "cache/" (6 chars) since /static already serves from CACHE_DIR
     const rel = path.slice(idx + 6);
-    return `${API_BASE.replace("/api/v1", "")}/static/${rel}`;
+    return `/static/${rel}`;
   }
-  // Fallback: extract last 3 path segments as relative path
   const segments = path.split("/").filter(Boolean).slice(-3);
-  return segments.length >= 3
-    ? `${API_BASE.replace("/api/v1", "")}/static/${segments.join("/")}`
-    : "";
+  return segments.length >= 3 ? `/static/${segments.join("/")}` : "";
 }

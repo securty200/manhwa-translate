@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, FolderOpen, X, CheckCircle2, AlertCircle, Loader2, ImageIcon, FileArchive, BookOpen } from "lucide-react";
+import { Upload, FileText, FolderOpen, X, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, Image as ImageIcon, FileArchive, BookOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mangaApi, type Manga } from "@/lib/api";
 
@@ -139,7 +139,7 @@ export default function UploadPage() {
 
       try {
         const resp = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/upload/${mangaId}/chapters/${chapterId}/pages`,
+          `/api/upload/${mangaId}/chapters/${chapterId}/pages`,
           { method: "POST", body: formData }
         );
 

@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ScrollText, AlertTriangle, Info, XCircle, Bug, RefreshCw, Download, Trash2, Search } from "lucide-react";
-import { cn, API_BASE } from "@/lib/utils";
+import { ScrollText, TriangleAlert as AlertTriangle, Info, Circle as XCircle, Bug, RefreshCw, Download, Trash2, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface LogEntry {
   timestamp: string;
@@ -33,7 +33,7 @@ export default function LogsPage() {
   const fetchLogs = useCallback(async () => {
     setLoading(true);
     try {
-      const resp = await fetch(`${API_BASE}/history/logs?lines=200`);
+      const resp = await fetch(`/api/history/logs?lines=200`);
       if (resp.ok) {
         const data = await resp.json();
         setLogs(data.logs || []);

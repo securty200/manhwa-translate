@@ -15,7 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Loader2 } from "lucide-react";
+import { Plus, Loader as Loader2 } from "lucide-react";
 import { mangaApi, type Manga, type Chapter, type Page } from "@/lib/api";
 import { imageUrl } from "@/lib/utils";
 
@@ -78,7 +78,7 @@ export default function EditorPage() {
     setLoadingBubbles(true);
     try {
       const resp = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1"}/manga/${selectedManga}/chapters/${selectedChapter}/bubbles`,
+        `/api/manga/${selectedManga}/chapters/${selectedChapter}/bubbles`,
       );
       if (resp.ok) {
         const allBubbles = await resp.json();
