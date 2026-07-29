@@ -130,8 +130,13 @@ export interface TranslationResponse {
 // ── API Functions ──────────────────────────────────────────────────────
 
 export const mangaApi = {
-  list: (params?: { page?: number; per_page?: number; search?: string }) =>
-    request<Manga[]>(`/manga?${new URLSearchParams(params as any)}`),
+  list: (params?: { page?: number; per_page?: number; search?: string }) => {
+    const clean: Record<string, string> = {};
+    for (const [k, v] of Object.entries(params ?? {})) {
+      if (v != null) clean[k] = String(v);
+    }
+    return request<Manga[]>(`/manga?${new URLSearchParams(clean)}`);
+  },
 
   get: (id: string) => request<Manga>(`/manga/${id}`),
 
