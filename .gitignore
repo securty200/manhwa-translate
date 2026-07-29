@@ -1,0 +1,51 @@
+# ── Python ──────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+env/
+
+# ── Node ────────────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+
+# ── IDE / Editor ────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ── Environment ─────────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+
+# ── Project Generated ───────────────────────────────────────────────────
+cache/*
+!cache/.gitkeep
+logs/*
+!logs/.gitkeep
+models/checkpoints/*
+!models/checkpoints/.gitkeep
+models/onnx/*
+!models/onnx/.gitkeep
+database/*.db
+database/*.db-journal
+assets/fonts/*
+!assets/fonts/.gitkeep
+*.sqlite3
+
+# ── Docker ──────────────────────────────────────────────────────────────
+.docker/
+
+# ── Testing ─────────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

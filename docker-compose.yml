@@ -1,0 +1,76 @@
+# ── AI Manga Translator — Docker Compose ────────────────────────────────
+# Local development setup
+
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    container_name: manga-translator-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./cache:/app/cache
+      - ./assets:/app/assets
+      - ./.env:/app/.env
+    environment:
+      - ENV=development
+      - DEBUG=true
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/v1/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: manga-translator-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    volumes:
+      - ./frontend/src:/app/src
+
+  # GPU support (NVIDIA CUDA)
+  # Uncomment the section below to enable GPU acceleration
+  # backend:
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: [gpu]
+  #   environment:
+  #     - CUDA_ENABLED=true
+  #     - INPAINTING_DEVICE=cuda
+  #     - OCR_DEVICE=cuda
+  #     - NVIDIA_VISIBLE_DEVICES=all
+
+  # Redis for multi-process shared caching (required by cache_service)
+  redis:
+    image: redis:7-alpine
+    container_name: manga-translator-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - cache:/data
+    restart: unless-stopped
+
+volumes:
+  cache:

@@ -1,0 +1,22 @@
+# ── Docker Ignore ───────────────────────────────────────────────────────
+.git
+.gitignore
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
+.env
+.env.local
+node_modules
+.next
+cache/*
+!cache/.gitkeep
+logs/*
+!logs/.gitkeep
+models/checkpoints/*
+models/onnx/*
+*.md
+tests/
+docs/
+.idea/
+.vscode/
