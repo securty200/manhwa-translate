@@ -152,6 +152,24 @@ export const mangaApi = {
 
   listPages: (mangaId: string, chapterId: string) =>
     request<Page[]>(`/manga/${mangaId}/chapters/${chapterId}/pages`),
+
+  getPage: (mangaId: string, chapterId: string, pageId: string) =>
+    request<Page>(`/manga/${mangaId}/chapters/${chapterId}/pages/${pageId}`),
+
+  listBubbles: (mangaId: string, chapterId: string) =>
+    request<any[]>(`/manga/${mangaId}/chapters/${chapterId}/bubbles`),
+
+  deleteChapter: (mangaId: string, chapterId: string) =>
+    request<void>(`/manga/${mangaId}/chapters/${chapterId}`, { method: "DELETE" }),
+
+  getStats: (mangaId: string) =>
+    request<any>(`/manga/${mangaId}/stats`),
+
+  duplicate: (mangaId: string, newTitle?: string) =>
+    request<{ message: string; new_id: string; new_title: string }>(
+      `/manga/${mangaId}/duplicate${newTitle ? `?new_title=${encodeURIComponent(newTitle)}` : ""}`,
+      { method: "POST" },
+    ),
 };
 
 export const translationApi = {

@@ -565,3 +565,121 @@ async def delete_chapter(
     await session.delete(chapter)
     await session.flush()
     logger.info("Deleted chapter %s from manga %s", chapter_id, manga_id)
+
+
+# ── Page Endpoints ────────────────────────────────────────────────────────
+
+
+@router.get("/{manga_id}/chapters/{chapter_id}/pages", response_model=list[PageResponse])
+async def list_pages(
+    manga_id: str,
+    chapter_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """List all pages for a chapter, ordered by page number."""
+    chapter = await session.get(Chapter, chapter_id)
+    if not chapter or chapter.manga_id != manga_id:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    result = await session.execute(
+        select(Page)
+        .where(Page.chapter_id == chapter_id)
+        .order_by(Page.page_number)
+    )
+    pages = result.scalars().all()
+
+    responses = []
+    for page in pages:
+        # Count bubbles for this page
+        bubble_count = (await session.execute(
+            select(func.count(Bubble.id)).where(Bubble.page_id == page.id)
+        )).scalar() or 0
+
+        responses.append(PageResponse(
+            id=page.id,
+            chapter_id=page.chapter_id,
+            page_number=page.page_number,
+            original_image_path=page.original_image_path,
+            translated_image_path=page.translated_image_path,
+            width=page.width,
+            height=page.height,
+            is_translated=page.is_translated,
+            bubble_count=bubble_count,
+        ))
+
+    return responses
+
+
+@router.get("/{manga_id}/chapters/{chapter_id}/pages/{page_id}", response_model=PageResponse)
+async def get_page(
+    manga_id: str,
+    chapter_id: str,
+    page_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """Get a single page with bubble count."""
+    chapter = await session.get(Chapter, chapter_id)
+    if not chapter or chapter.manga_id != manga_id:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    page = await session.get(Page, page_id)
+    if not page or page.chapter_id != chapter_id:
+        raise HTTPException(status_code=404, detail="Page not found")
+
+    bubble_count = (await session.execute(
+        select(func.count(Bubble.id)).where(Bubble.page_id == page.id)
+    )).scalar() or 0
+
+    return PageResponse(
+        id=page.id,
+        chapter_id=page.chapter_id,
+        page_number=page.page_number,
+        original_image_path=page.original_image_path,
+        translated_image_path=page.translated_image_path,
+        width=page.width,
+        height=page.height,
+        is_translated=page.is_translated,
+        bubble_count=bubble_count,
+    )
+
+
+@router.get("/{manga_id}/chapters/{chapter_id}/bubbles")
+async def list_chapter_bubbles(
+    manga_id: str,
+    chapter_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    """List all bubbles for all pages in a chapter."""
+    chapter = await session.get(Chapter, chapter_id)
+    if not chapter or chapter.manga_id != manga_id:
+        raise HTTPException(status_code=404, detail="Chapter not found")
+
+    result = await session.execute(
+        select(Bubble)
+        .join(Page, Bubble.page_id == Page.id)
+        .where(Page.chapter_id == chapter_id)
+        .order_by(Page.page_number, Bubble.reading_order)
+    )
+    bubbles = result.scalars().all()
+
+    return [
+        {
+            "id": b.id,
+            "page_id": b.page_id,
+            "bubble_type": b.bubble_type,
+            "x": b.x,
+            "y": b.y,
+            "width": b.width,
+            "height": b.height,
+            "polygon": b.polygon_json,
+            "confidence": b.confidence,
+            "reading_order": b.reading_order,
+            "original_text": b.original_text,
+            "translated_text": b.translated_text,
+            "is_translated": b.is_translated,
+            "rotation": b.rotation,
+            "detector_engine": b.detector_engine,
+            "has_precise_mask": b.has_precise_mask,
+        }
+        for b in bubbles
+    ]

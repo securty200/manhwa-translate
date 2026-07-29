@@ -27,6 +27,7 @@ export interface EditorState {
 
 export type EditorAction =
   | { type: "SET_BUBBLES"; bubbles: BubbleData[] }
+  | { type: "ADD_BUBBLE"; bubble: BubbleData }
   | { type: "SELECT_BUBBLE"; id: string | null }
   | { type: "MOVE_BUBBLE"; id: string; x: number; y: number }
   | { type: "RESIZE_BUBBLE"; id: string; width: number; height: number }
@@ -39,10 +40,45 @@ export type EditorAction =
   | { type: "DESELECT_ALL" }
   | { type: "SAVED" };
 
+let _bubbleIdCounter = 0;
+export function createBubble(
+  x = 100,
+  y = 100,
+  width = 150,
+  height = 80,
+): BubbleData {
+  _bubbleIdCounter += 1;
+  return {
+    id: `bubble-${Date.now()}-${_bubbleIdCounter}`,
+    x,
+    y,
+    width,
+    height,
+    rotation: 0,
+    text: "",
+    originalText: "",
+    fontFamily: "manga.ttf",
+    fontSize: 16,
+    bubbleType: "speech",
+    isSelected: false,
+  };
+}
+
 export function editorReducer(state: EditorState, action: EditorAction): EditorState {
   switch (action.type) {
     case "SET_BUBBLES":
       return { ...state, bubbles: action.bubbles, isDirty: false };
+
+    case "ADD_BUBBLE":
+      return {
+        ...state,
+        isDirty: true,
+        selectedId: action.bubble.id,
+        bubbles: [
+          ...state.bubbles.map((b) => ({ ...b, isSelected: false })),
+          { ...action.bubble, isSelected: true },
+        ],
+      };
 
     case "SELECT_BUBBLE":
       return {

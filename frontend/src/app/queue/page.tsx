@@ -1,13 +1,14 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ListOrdered, Play, Pause, XCircle, RotateCcw, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { ListOrdered, Play, Pause, Circle as XCircle, RotateCcw, Clock, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Loader as Loader2, Wifi, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { translationApi, type TranslationJob } from "@/lib/api";
+import { useGlobalJobEvents } from "@/lib/use-websocket";
 
 const statusConfig: Record<string, { label: string; variant: "success" | "warning" | "destructive" | "info" | "secondary"; icon: any }> = {
   pending: { label: "Pending", variant: "secondary", icon: Clock },
@@ -23,6 +24,7 @@ export default function QueuePage() {
   const [jobs, setJobs] = useState<TranslationJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
+  const { events, connected } = useGlobalJobEvents();
 
   const fetchJobs = useCallback(async () => {
     try {
@@ -40,6 +42,26 @@ export default function QueuePage() {
     const interval = setInterval(fetchJobs, 5000);
     return () => clearInterval(interval);
   }, [fetchJobs]);
+
+  // Real-time update from WebSocket events
+  useEffect(() => {
+    if (events.length === 0) return;
+    const latest = events[events.length - 1];
+    if (!latest.job_id) return;
+    setJobs((prev) =>
+      prev.map((j) =>
+        j.id === latest.job_id
+          ? {
+              ...j,
+              status: latest.status,
+              progress: latest.progress,
+              total_pages: latest.total_pages ?? j.total_pages,
+              completed_pages: latest.current_page ?? j.completed_pages,
+            }
+          : j
+      )
+    );
+  }, [events]);
 
   const handleCancel = async (id: string) => {
     try { await translationApi.cancelJob(id); fetchJobs(); } catch (err) { console.error(err); }
@@ -73,11 +95,17 @@ export default function QueuePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Job Queue</h1>
-        <p className="mt-1 text-muted-foreground">
-          {counts.processing} active, {counts.queued} queued, {counts.failed} failed
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Job Queue</h1>
+          <p className="mt-1 text-muted-foreground">
+            {counts.processing} active, {counts.queued} queued, {counts.failed} failed
+          </p>
+        </div>
+        <Badge variant={connected ? "success" : "secondary"} className="gap-1">
+          {connected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+          {connected ? "Live" : "Polling"}
+        </Badge>
       </div>
 
       {/* Filter Tabs */}

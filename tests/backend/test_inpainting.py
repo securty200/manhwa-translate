@@ -5,7 +5,7 @@ from __future__ import annotations
 import pytest
 from PIL import Image
 
-from backend.inpainting import InpaintingService, InpaintRegion, InpaintResult
+from backend.inpainting import InpaintingService, InpaintRegion
 
 
 @pytest.mark.asyncio
@@ -77,7 +77,6 @@ async def test_inpaint_empty_regions():
     img = Image.new("RGB", (200, 200), color="white")
     result = await service.inpaint_page(img, [])
     assert result.regions_inpainted == 0
-    # Image should be unchanged
     import numpy as np
     assert np.array_equal(np.array(result.image), np.array(img))
     await service.cleanup()
@@ -86,10 +85,7 @@ async def test_inpaint_empty_regions():
 @pytest.mark.asyncio
 async def test_inpaint_no_engines():
     """Test inpainting when no engines are available."""
-    service = InpaintingService(
-        engine_priority=["nonexistent_engine"],
-    )
-    # Should not crash even with unknown engine
+    service = InpaintingService(engine_priority=["nonexistent_engine"])
     await service.initialize()
 
     img = Image.new("RGB", (200, 200), color="white")
@@ -107,7 +103,6 @@ async def test_inpaint_batch_legacy_tuples():
     await service.initialize()
 
     img = Image.new("RGB", (200, 200), color="white")
-    # Legacy format: list of (x, y, w, h) tuples
     regions: list[InpaintRegion | tuple[int, int, int, int]] = [
         (10, 10, 50, 30),
         (100, 100, 80, 40),

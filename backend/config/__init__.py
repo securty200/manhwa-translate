@@ -256,7 +256,7 @@ class Settings(BaseSettings):
         safe_path = str(db_path.as_posix())
         return f"sqlite+aiosqlite:///{safe_path}"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": True}
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": True, "extra": "ignore"}
 
 
 settings = Settings()
