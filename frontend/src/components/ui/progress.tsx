@@ -22,12 +22,12 @@ function Progress({ className, value = 0, max = 100, variant = "default", ...pro
     >
       <div
         className={cn(
-          "h-full w-full flex-1 rounded-full transition-all duration-500 ease-out",
-          variant === "success" && "bg-emerald-500",
-          variant === "warning" && "bg-amber-500",
-          variant === "default" && "bg-primary"
+          "h-full flex-1 rounded-full transition-all duration-500 ease-out",
+          variant === "success" && "bg-gradient-to-r from-emerald-500 to-teal-500",
+          variant === "warning" && "bg-gradient-to-r from-amber-500 to-orange-500",
+          variant === "default" && "bg-gradient-to-r from-primary to-accent"
         )}
-        style={{ transform: `translateX(-${100 - pct}%)` }}
+        style={{ width: `${pct}%` }}
       />
     </div>
   );

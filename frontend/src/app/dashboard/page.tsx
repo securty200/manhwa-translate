@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Clock, CheckCircle2, Activity, TrendingUp, RefreshCw } from "lucide-react";
+import { BookOpen, Clock, CircleCheck as CheckCircle2, Activity, TrendingUp, RefreshCw, Zap, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { mangaApi, translationApi, type Manga, type TranslationJob } from "@/lib/api";
 
@@ -53,10 +53,10 @@ export default function DashboardPage() {
   const failedJobs = recentJobs.filter((j) => j.status === "failed").length;
 
   const stats = [
-    { label: "Total Projects", value: String(projects.length), icon: BookOpen, color: "text-sky-500", bg: "bg-sky-500/10" },
-    { label: "Translated Pages", value: String(translatedPages), icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10" },
-    { label: "Active Jobs", value: String(activeJobs), icon: Activity, color: "text-amber-500", bg: "bg-amber-500/10" },
-    { label: "Total Pages", value: String(totalPages), icon: TrendingUp, color: "text-violet-500", bg: "bg-violet-500/10" },
+    { label: "Total Projects", value: String(projects.length), icon: BookOpen, color: "text-sky-500", bg: "bg-sky-500/10", glow: "shadow-sky-500/20" },
+    { label: "Translated Pages", value: String(translatedPages), icon: CheckCircle2, color: "text-emerald-500", bg: "bg-emerald-500/10", glow: "shadow-emerald-500/20" },
+    { label: "Active Jobs", value: String(activeJobs), icon: Activity, color: "text-amber-500", bg: "bg-amber-500/10", glow: "shadow-amber-500/20" },
+    { label: "Total Pages", value: String(totalPages), icon: TrendingUp, color: "text-teal-500", bg: "bg-teal-500/10", glow: "shadow-teal-500/20" },
   ];
 
   const systemItems: Array<{ label: string; status: string; variant: BadgeVariant }> = [
@@ -68,13 +68,14 @@ export default function DashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Hero header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="mt-1 text-muted-foreground">Overview of your translation projects</p>
         </div>
         <Button variant="outline" size="sm" onClick={fetchData} disabled={loading}>
-          <RefreshCw className={cn("h-3.5 w-3.5 mr-1", loading && "animate-spin")} /> Refresh
+          <RefreshCw className={cn("h-3.5 w-3.5 mr-1.5", loading && "animate-spin")} /> Refresh
         </Button>
       </div>
 
@@ -86,47 +87,60 @@ export default function DashboardPage() {
         </div>
       ) : (
         <>
+          {/* Stat cards */}
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {stats.map((stat) => (
-              <Card key={stat.label} className="transition-all hover:shadow-md">
+            {stats.map((stat, i) => (
+              <Card
+                key={stat.label}
+                className="card-hover animate-slide-up overflow-hidden"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
-                    <div className={cn("rounded-lg p-2.5", stat.bg)}>
+                    <div className={cn("rounded-xl p-3 shadow-lg", stat.bg, stat.glow)}>
                       <stat.icon className={cn("h-5 w-5", stat.color)} />
                     </div>
                   </div>
                   <div className="mt-4">
-                    <p className="text-2xl font-bold">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground">{stat.label}</p>
+                    <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
                   </div>
                 </CardContent>
               </Card>
             ))}
           </div>
 
+          {/* Recent jobs + system status */}
           <div className="grid gap-6 lg:grid-cols-2">
-            <Card>
+            <Card className="card-hover">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Clock className="h-4 w-4" /> Recent Jobs
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Clock className="h-4 w-4 text-primary" /> Recent Jobs
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {recentJobs.length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-8">No recent translation jobs</p>
+                  <div className="flex flex-col items-center py-8">
+                    <Clock className="h-8 w-8 text-muted-foreground/30 mb-3" />
+                    <p className="text-sm text-muted-foreground">No recent translation jobs</p>
+                  </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {recentJobs.map((job) => (
-                      <div key={job.id} className="flex items-center justify-between gap-4 rounded-lg border p-3 transition-colors hover:bg-accent/50">
+                      <div key={job.id} className="flex items-center justify-between gap-4 rounded-lg border border-border/50 p-3 transition-all hover:border-primary/30 hover:bg-accent/5">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">Job {job.id.slice(0, 8)}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            <Globe className="h-3 w-3 inline mr-1" />
                             {job.source_language}→{job.target_language} · {job.total_pages} pages
                           </p>
                         </div>
                         <div className="flex items-center gap-3">
                           <div className="w-20">
-                            <Progress value={job.progress} variant={job.status === "completed" ? "success" : job.status === "failed" ? "warning" : "default"} />
+                            <Progress
+                              value={job.progress}
+                              variant={job.status === "completed" ? "success" : job.status === "failed" ? "warning" : "default"}
+                            />
                           </div>
                           <Badge variant={statusVariant[job.status] || "secondary"}>{job.status}</Badge>
                         </div>
@@ -137,15 +151,15 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="card-hover">
               <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Activity className="h-4 w-4" /> System Status
+                <CardTitle className="text-base flex items-center gap-2">
+                  <Zap className="h-4 w-4 text-primary" /> System Status
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3">
                 {systemItems.map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-lg border p-3">
+                  <div key={item.label} className="flex items-center justify-between rounded-lg border border-border/50 p-3 transition-colors hover:bg-accent/5">
                     <span className="text-sm font-medium">{item.label}</span>
                     <Badge variant={item.variant}>{item.status}</Badge>
                   </div>

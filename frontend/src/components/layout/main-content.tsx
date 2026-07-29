@@ -8,11 +8,13 @@ export function MainContent({ children }: { children: React.ReactNode }) {
   return (
     <main
       className={cn(
-        "min-h-screen transition-all duration-300",
+        "min-h-screen transition-all duration-300 ease-in-out",
         collapsed ? "pl-16" : "pl-60"
       )}
     >
-      <div className="container mx-auto p-6 max-w-7xl">{children}</div>
+      <div className="relative z-10 mx-auto max-w-7xl p-6 lg:p-8">
+        <div className="animate-fade-in">{children}</div>
+      </div>
     </main>
   );
 }
